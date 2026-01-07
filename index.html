@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEE 2026 Chemistry: The 100 Question Protocol</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --correct: #22c55e;
+            --wrong: #ef4444;
+            --accent-org: #16a34a;
+            --accent-inorg: #d97706;
+            --accent-phy: #dc2626;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 2.2rem; letter-spacing: -0.5px; }
+        .subtitle { color: #94a3b8; margin-top: 8px; font-weight: 300; font-size: 1.1rem; }
+
+        /* Stats Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            max-width: 800px;
+            margin: -30px auto 20px;
+            padding: 0 20px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border-bottom: 4px solid var(--primary);
+        }
+
+        .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--text); display: block; }
+        .stat-label { font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Filter Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0 30px;
+            flex-wrap: wrap;
+            padding: 0 10px;
+        }
+
+        .tab {
+            padding: 8px 20px;
+            border-radius: 25px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .tab.active { background: var(--text); color: white; border-color: var(--text); }
+        .tab:hover:not(.active) { background: #f1f5f9; }
+
+        /* Question Container */
+        .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
+
+        .q-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid #cbd5e1;
+            transition: transform 0.2s;
+        }
+
+        .q-card[data-sec="Physical"] { border-left-color: var(--accent-phy); }
+        .q-card[data-sec="Organic"] { border-left-color: var(--accent-org); }
+        .q-card[data-sec="Inorganic"] { border-left-color: var(--accent-inorg); }
+
+        .meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag { padding: 3px 8px; border-radius: 4px; background: #f1f5f9; color: #475569; }
+        
+        .q-text { font-size: 1.15rem; margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media(max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+
+        .opt {
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .opt:hover { background: #f8fafc; border-color: var(--primary); }
+        
+        .opt.correct { background: #dcfce7; border-color: var(--correct); color: #166534; pointer-events: none; }
+        .opt.wrong { background: #fee2e2; border-color: var(--wrong); color: #991b1b; pointer-events: none; }
+        .opt.dim { opacity: 0.5; pointer-events: none; }
+
+        .solution {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            border-left: 4px solid var(--correct);
+            display: none;
+            font-size: 0.95rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<header>
+    <h1>🧪 JEE Chemistry 2026</h1>
+    <div class="subtitle">100 High-Weightage Expected Questions</div>
+</header>
+
+<div class="dashboard">
+    <div class="stat-card">
+        <span class="stat-val" id="total-q">100</span>
+        <span class="stat-label">Total Qs</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-val" id="score">0</span>
+        <span class="stat-label">Mastered</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-val" id="progress">0%</span>
+        <span class="stat-label">Progress</span>
+    </div>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="filterQuestions('All')">All Topics</div>
+    <div class="tab" onclick="filterQuestions('Physical')">Physical</div>
+    <div class="tab" onclick="filterQuestions('Organic')">Organic</div>
+    <div class="tab" onclick="filterQuestions('Inorganic')">Inorganic</div>
+</div>
+
+<div id="quiz-app" class="container"></div>
+
+<script>
+    // --- THE 100 QUESTION DATABASE ---
+    const db = [
+        // 1-22 (Phase 1)
+        { id: 1, section: "Physical", chapter: "Electrochemistry", topic: "Nernst Eq", q: "For \\(Zn + Cu^{2+} \\to Zn^{2+} + Cu\\), if \\([Zn^{2+}]\\) is increased 10 times, the EMF:", options: ["Increases by 0.0295V", "Decreases by 0.0295V", "Increases by 0.059V", "Decreases by 0.059V"], ans: 1, sol: "E decreases. Log term increases by 1. Change = -0.059/2 * 1." },
+        { id: 2, section: "Physical", chapter: "Chemical Kinetics", topic: "First Order", q: "First order reaction is 75% complete in 60 min. Time for 50% completion?", options: ["30 min", "45 min", "20 min", "15 min"], ans: 0, sol: "75% is 2 half-lives. \\(2t_{1/2} = 60 \\Rightarrow t_{1/2}=30\\)." },
+        { id: 3, section: "Physical", chapter: "Solutions", topic: "Colligative Props", q: "Highest Boiling Point?", options: ["0.1M Urea", "0.1M NaCl", "0.1M BaCl2", "0.1M Glucose"], ans: 2, sol: "\\(BaCl_2\\) has i=3 (highest van't Hoff factor)." },
+        { id: 4, section: "Physical", chapter: "Thermodynamics", topic: "Spontaneity", q: "Reaction is spontaneous at all temperatures if:", options: ["dH>0, dS>0", "dH<0, dS<0", "dH<0, dS>0", "dH>0, dS<0"], ans: 2, sol: "\\(\\Delta G = \\Delta H - T\\Delta S\\). If dH -ve and dS +ve, dG is always -ve." },
+        { id: 5, section: "Physical", chapter: "Atomic Structure", topic: "Quantum Nos", q: "Max electrons in a subshell with l=3?", options: ["10", "14", "6", "18"], ans: 1, sol: "\\(2(2l+1) = 2(7) = 14\\)." },
+        { id: 6, section: "Physical", chapter: "Equilibrium", topic: "Solubility", q: "Ksp of \\(CaF_2\\) (Solubility S)?", options: ["\\(4S^3\\)", "\\(S^2\\)", "\\(27S^4\\)", "\\(S^3\\)"], ans: 0, sol: "\\(Ksp = [Ca][F]^2 = S(2S)^2 = 4S^3\\)." },
+        { id: 7, section: "Physical", chapter: "Mole Concept", topic: "Limiting Reagent", q: "20g \\(H_2\\) reacts with 32g \\(O_2\\). Water formed?", options: ["36g", "18g", "54g", "72g"], ans: 0, sol: "\\(O_2\\) (1 mol) is limiting. 1 mol \\(O_2\\) gives 2 mol \\(H_2O\\) (36g)." },
+        { id: 8, section: "Inorganic", chapter: "Coordination", topic: "Isomerism", q: "\\([Co(NH_3)_5Br]SO_4\\) and \\([Co(NH_3)_5SO_4]Br\\) show:", options: ["Linkage", "Ionisation", "Geometrical", "Optical"], ans: 1, sol: "Different ions in solution (SO4 vs Br)." },
+        { id: 9, section: "Inorganic", chapter: "Bonding", topic: "VSEPR", q: "Shape of \\(XeF_4\\)?", options: ["Tetrahedral", "Square Planar", "See-saw", "Octahedral"], ans: 1, sol: "sp3d2 with 2 lone pairs. Square Planar." },
+        { id: 10, section: "Inorganic", chapter: "Bonding", topic: "MOT", q: "Which species is Diamagnetic?", options: ["\\(O_2\\)", "\\(O_2^-\\)", "\\(O_2^{2-}\\)", "\\(O_2^+\\)"], ans: 2, sol: "Peroxide ion (18e) has no unpaired electrons." },
+        { id: 11, section: "Inorganic", chapter: "D-Block", topic: "Mag Moment", q: "Spin-only moment of \\(Mn^{2+}\\) (Z=25)?", options: ["5.9 BM", "4.9 BM", "3.8 BM", "2.8 BM"], ans: 0, sol: "d5 system (5 unpaired). \\(\\sqrt{35} \\approx 5.9\\)." },
+        { id: 12, section: "Inorganic", chapter: "Periodic", topic: "Ionization En", q: "Order of 1st IE?", options: ["B<C<N<O", "B<C<O<N", "C<B<N<O", "O<N<B<C"], ans: 1, sol: "N > O due to stable half-filled p-orbital." },
+        { id: 13, section: "Inorganic", chapter: "Coordination", topic: "Ligands", q: "Strongest Field Ligand?", options: ["F-", "H2O", "CN-", "Cl-"], ans: 2, sol: "C-donors (CN, CO) are strong field." },
+        { id: 14, section: "Organic", chapter: "GOC", topic: "Acidity", q: "Strongest Acid?", options: ["Phenol", "p-Nitrophenol", "m-Nitrophenol", "Ethanol"], ans: 1, sol: "-M and -I effect of NO2 at para stabilizes phenoxide most." },
+        { id: 15, section: "Organic", chapter: "Aldehydes", topic: "Aldol", q: "Which does NOT show Aldol Condensation?", options: ["Acetaldehyde", "Propanone", "Formaldehyde", "Ethanal"], ans: 2, sol: "HCHO has no alpha-hydrogen." },
+        { id: 16, section: "Organic", chapter: "Amines", topic: "Basicity", q: "Basic strength of methyl amines in aqueous?", options: ["2>1>3", "3>2>1", "2>3>1", "1>2>3"], ans: 0, sol: "For methyl: \\(2^\\circ > 1^\\circ > 3^\\circ\\) due to solvation/steric." },
+        { id: 17, section: "Organic", chapter: "Hydrocarbons", topic: "Reactions", q: "Propene + HBr + Peroxide gives?", options: ["2-Bromopropane", "1-Bromopropane", "Propane", "Propyne"], ans: 1, sol: "Anti-Markovnikov addition (Kharasch effect)." },
+        { id: 18, section: "Organic", chapter: "Biomolecules", topic: "Carbohydrates", q: "Glucose + HI/Heat gives?", options: ["Sorbitol", "n-Hexane", "Saccharic acid", "Gluconic acid"], ans: 1, sol: "Proves straight carbon chain." },
+        { id: 19, section: "Organic", chapter: "Haloalkanes", topic: "SN1", q: "Fastest SN1 reaction?", options: ["Me-Cl", "Iso-Pr-Cl", "t-Bu-Cl", "Et-Cl"], ans: 2, sol: "Tertiary carbocation is most stable." },
+        { id: 20, section: "Organic", chapter: "GOC", topic: "Stability", q: "Most stable carbocation?", options: ["t-Butyl", "Ethyl", "Vinyl", "Benzyl"], ans: 0, sol: "t-Butyl (9 alpha-H) is very stable." },
+        { id: 21, section: "Physical", chapter: "Thermo", topic: "Work", q: "Work in reversible isothermal expansion?", options: ["\\(-nRT \\ln(V_2/V_1)\\)", "-PdV", "nRTln...", "0"], ans: 0, sol: "Standard formula." },
+        { id: 22, section: "Inorganic", chapter: "P-Block", topic: "Oxides", q: "Neutral Oxide?", options: ["NO2", "N2O", "N2O5", "N2O3"], ans: 1, sol: "N2O and NO are neutral." },
+
+        // 23-100 (Expansion Pack)
+        { id: 23, section: "Physical", chapter: "Electrochemistry", topic: "Faraday Laws", q: "Charge required to reduce 1 mol \\(Cr_2O_7^{2-}\\) to \\(Cr^{3+}\\)?", options: ["3F", "6F", "1F", "2F"], ans: 1, sol: "Cr goes +6 to +3. Change is 3 per atom. 2 atoms = 6 electrons." },
+        { id: 24, section: "Physical", chapter: "Solutions", topic: "Raoult's Law", q: "Positive deviation from Raoult's Law?", options: ["Chloroform + Acetone", "Ethanol + Acetone", "H2O + HCl", "Phenol + Aniline"], ans: 1, sol: "Ethanol-Acetone breaks H-bonds." },
+        { id: 25, section: "Physical", chapter: "Kinetics", topic: "Arrhenius", q: "Slope of ln k vs 1/T plot?", options: ["-Ea/R", "Ea/R", "-Ea", "ln A"], ans: 0, sol: "\\(\\ln k = -Ea/RT + \\ln A\\)." },
+        { id: 26, section: "Physical", chapter: "Atomic", topic: "Bohr Radius", q: "Ratio radius 2nd orbit Li2+ to 3rd orbit He+?", options: ["8:27", "4:9", "32:27", "16:27"], ans: 2, sol: "\\(r \\propto n^2/Z\\). Ratio 4/3 : 9/2 = 8:27." },
+        { id: 27, section: "Physical", chapter: "Equilibrium", topic: "Buffer", q: "pH of buffer when [Salt]=[Acid]?", options: ["pKa", "pKa + 1", "pKa - 1", "7"], ans: 0, sol: "\\(pH = pKa + \\log(1) = pKa\\)." },
+        { id: 28, section: "Inorganic", chapter: "Coordination", topic: "Hybridization", q: "Hybridization of \\([Ni(CN)_4]^{2-}\\)?", options: ["sp3", "dsp2", "sp3d", "d2sp3"], ans: 1, sol: "Strong field CN pairs electrons. Square Planar." },
+        { id: 29, section: "Inorganic", chapter: "Bonding", topic: "Dipole", q: "Zero Dipole Moment?", options: ["NH3", "NF3", "BF3", "H2O"], ans: 2, sol: "Symmetrical Trigonal Planar." },
+        { id: 30, section: "Inorganic", chapter: "Periodic", topic: "Electron Gain", q: "Highest Electron Gain Enthalpy?", options: ["F", "Cl", "Br", "I"], ans: 1, sol: "Cl > F (F has repulsion)." },
+        { id: 31, section: "Inorganic", chapter: "P-Block", topic: "Group 16", q: "Bleaching action of SO2?", options: ["Oxidation", "Reduction", "Hydrolysis", "Dehydration"], ans: 1, sol: "Due to reduction (Temporary)." },
+        { id: 32, section: "Organic", chapter: "Aldehydes", topic: "Tests", q: "Fehling solution test positive for?", options: ["Benzaldehyde", "Acetone", "Acetaldehyde", "Ethyl Acetate"], ans: 2, sol: "Aliphatic aldehydes only." },
+        { id: 33, section: "Organic", chapter: "GOC", topic: "Aromaticity", q: "Which is Aromatic?", options: ["Cyclopentadienyl anion", "Cyclopentadienyl cation", "Cyclooctatetraene", "Cyclobutadiene"], ans: 0, sol: "6 pi electrons (4n+2)." },
+        { id: 34, section: "Organic", chapter: "Amines", topic: "Hinsberg", q: "Hinsberg Reagent is?", options: ["Benzene sulphonyl chloride", "Benzene diazonium chloride", "Acetyl chloride", "Benzoyl chloride"], ans: 0, sol: "Used to distinguish amines." },
+        { id: 35, section: "Organic", chapter: "Haloalkanes", topic: "Elimination", q: "Dehydrohalogenation of 2-Bromobutane major product?", options: ["1-Butene", "2-Butene", "Butane", "Butyne"], ans: 1, sol: "Saytzeff Rule: More substituted alkene." },
+        { id: 36, section: "Organic", chapter: "Biomolecules", topic: "Vitamins", q: "Deficiency of Vit B12?", options: ["Scurvy", "Rickets", "Pernicious Anaemia", "Beriberi"], ans: 2, sol: "Pernicious Anaemia." },
+        { id: 37, section: "Physical", chapter: "Solid State", topic: "Packing", q: "Packing Efficiency of FCC?", options: ["52.4%", "68%", "74%", "48%"], ans: 2, sol: "Highest packing efficiency." },
+        { id: 38, section: "Physical", chapter: "Surface", topic: "Colloids", q: "Tyndall effect NOT in?", options: ["Suspension", "Emulsion", "Sugar Solution", "Gold Sol"], ans: 2, sol: "True solutions don't scatter light." },
+        { id: 39, section: "Inorganic", chapter: "Metallurgy", topic: "Refining", q: "Mond Process metal?", options: ["Ni", "Zr", "Ti", "Zn"], ans: 0, sol: "Nickel purification." },
+        { id: 40, section: "Inorganic", chapter: "D-Block", topic: "KMnO4", q: "KMnO4 acts as oxidant in?", options: ["Acidic", "Basic", "Neutral", "All"], ans: 3, sol: "Works in all media." },
+        { id: 41, section: "Organic", chapter: "Phenols", topic: "Reimer-Tiemann", q: "Phenol + CHCl3 + KOH?", options: ["Salicylic Acid", "Salicylaldehyde", "Benzoic Acid", "Benzaldehyde"], ans: 1, sol: "Ortho-formylation." },
+        { id: 42, section: "Organic", chapter: "Ethers", topic: "Cleavage", q: "Anisole + HI gives?", options: ["Phenol + MeI", "Iodobenzene + MeOH", "Phenol + MeOH", "Benzene + MeI"], ans: 0, sol: "O-Me bond breaks." },
+        { id: 43, section: "Physical", chapter: "Kinetics", topic: "Zero Order", q: "Unit of k for Zero order?", options: ["mol L-1 s-1", "s-1", "L mol-1 s-1", "Dimensionless"], ans: 0, sol: "Same as rate." },
+        { id: 44, section: "Physical", chapter: "Thermo", topic: "Hess Law", q: "Hess Law application?", options: ["Entropy", "Enthalpy change", "Rate", "Equilibrium"], ans: 1, sol: "State function property of Enthalpy." },
+        { id: 45, section: "Inorganic", chapter: "Bonding", topic: "Bond Order", q: "Bond order of N2?", options: ["2", "2.5", "3", "3.5"], ans: 2, sol: "Triple bond." },
+        { id: 46, section: "Inorganic", chapter: "Periodic", topic: "Size", q: "Smallest size?", options: ["Al", "Al+", "Al2+", "Al3+"], ans: 3, sol: "Highest positive charge." },
+        { id: 47, section: "Organic", chapter: "Amines", topic: "Gabriel Phthalimide", q: "Prepares?", options: ["1 deg Aliphatic", "1 deg Aromatic", "2 deg", "3 deg"], ans: 0, sol: "Only primary aliphatic." },
+        { id: 48, section: "Organic", chapter: "Polymers", topic: "Classification", q: "Which is a Polyamide?", options: ["Nylon-6,6", "Terylene", "Buna-S", "Polythene"], ans: 0, sol: "Amide linkage." },
+        { id: 49, section: "Physical", chapter: "Equilibrium", topic: "Le Chatelier", q: "Endothermic rxn Temp increase?", options: ["Forward", "Backward", "No change", "Random"], ans: 0, sol: "Consumes heat." },
+        { id: 50, section: "Physical", chapter: "Electrochem", topic: "Kohlrausch", q: "Limiting cond CH3COOH?", options: ["L(H) + L(Ac)", "L(H) - L(Ac)", "L(NaAc) + L(HCl)", "None"], ans: 0, sol: "Sum of ions." },
+        { id: 51, section: "Inorganic", chapter: "Coordination", topic: "Color", q: "Colorless complex?", options: ["TiF6(2-)", "CoF6(3-)", "NiCl4(2-)", "Fe(H2O)6(3+)"], ans: 0, sol: "Ti(+4) is d0." },
+        { id: 52, section: "Inorganic", chapter: "P-Block", topic: "PCl5", q: "Structure of PCl5 solid?", options: ["PCl5", "[PCl4]+ [PCl6]-", "P2Cl10", "PCl3+Cl2"], ans: 1, sol: "Ionic solid." },
+        { id: 53, section: "Organic", chapter: "Chemistry Life", topic: "Drugs", q: "Aspirin is?", options: ["Antibiotic", "Analgesic", "Antiseptic", "Tranquilizer"], ans: 1, sol: "Pain reliever." },
+        { id: 54, section: "Organic", chapter: "Aldehydes", topic: "Cannizzaro", q: "HCHO + Conc KOH?", options: ["HCOOK + MeOH", "HCOOH + HCOOH", "MeOH + MeOH", "Ethanol"], ans: 0, sol: "Disproportionation." },
+        { id: 55, section: "Physical", chapter: "Solutions", topic: "Henry Law", q: "Gas solubility in liquid?", options: ["Inc with Temp", "Dec with Pressure", "Inc with Pressure", "Const"], ans: 2, sol: "Pressure forces gas in." },
+        { id: 56, section: "Physical", chapter: "Atomic", topic: "Isotopes", q: "Isotopes differ in?", options: ["Protons", "Neutrons", "Electrons", "Chem Prop"], ans: 1, sol: "Neutron number." },
+        { id: 57, section: "Inorganic", chapter: "D-Block", topic: "Alloys", q: "Brass composition?", options: ["Cu + Zn", "Cu + Sn", "Cu + Ni", "Zn + Sn"], ans: 0, sol: "CuZn." },
+        { id: 58, section: "Organic", chapter: "GOC", topic: "Hyperconjugation", q: "Orbital overlap?", options: ["p-p", "sigma-p", "sigma-sigma", "sp3-s"], ans: 1, sol: "C-H sigma and empty p." },
+        { id: 59, section: "Organic", chapter: "Biomolecules", topic: "Proteins", q: "Denaturation affects?", options: ["Primary", "Secondary", "Tertiary", "Quaternary"], ans: 0, sol: "Primary sequence stays same." },
+        { id: 60, section: "Physical", chapter: "Thermo", topic: "Internal Energy", q: "dU for cyclic process?", options: ["Positive", "Negative", "Zero", "Infinite"], ans: 2, sol: "State function." },
+        { id: 61, section: "Inorganic", chapter: "Bonding", topic: "Fajan Rule", q: "Most Covalent?", options: ["LiCl", "NaCl", "KCl", "RbCl"], ans: 0, sol: "Smallest cation polarizes most." },
+        { id: 62, section: "Organic", chapter: "Haloalkanes", topic: "Grignard", q: "RMgX + H2O gives?", options: ["ROH", "RH", "R-R", "RCHO"], ans: 1, sol: "Active H gives alkane." },
+        { id: 63, section: "Physical", chapter: "States", topic: "Z Factor", q: "Z for ideal gas?", options: ["0", "1", ">1", "<1"], ans: 1, sol: "PV=nRT." },
+        { id: 64, section: "Inorganic", chapter: "P-Block", topic: "Noble Gas", q: "Iso-structural with IBr2-?", options: ["XeF2", "XeF4", "XeO3", "XeF6"], ans: 0, sol: "Linear." },
+        { id: 65, section: "Organic", chapter: "Amines", topic: "Sandmeyer", q: "Ph-N2Cl + CuCl/HCl?", options: ["Chlorobenzene", "Benzene", "Aniline", "Phenol"], ans: 0, sol: "Sandmeyer." },
+        { id: 66, section: "Physical", chapter: "Redox", topic: "Ox State", q: "Cr in CrO5?", options: ["+6", "+10", "+4", "+3"], ans: 0, sol: "Butterfly structure (+6)." },
+        { id: 67, section: "Inorganic", chapter: "Coordination", topic: "EAN", q: "EAN of [Fe(CN)6]4-?", options: ["36", "35", "37", "34"], ans: 0, sol: "26-2+12 = 36." },
+        { id: 68, section: "Organic", chapter: "GOC", topic: "Resonance", q: "Least stable resonance structure?", options: ["Charge sep", "Incomplete octet", "Covalent bonds", "Neg on O"], ans: 1, sol: "Octet rule priority." },
+        { id: 69, section: "Physical", chapter: "Kinetics", topic: "Molecularity", q: "Molecularity cannot be?", options: ["Fraction", "Zero", "Integer", "Fraction or Zero"], ans: 3, sol: "Must be positive integer." },
+        { id: 70, section: "Physical", chapter: "Electrochem", topic: "Batteries", q: "Cathode in Lead Storage?", options: ["Pb", "PbO2", "PbSO4", "H2SO4"], ans: 1, sol: "PbO2." },
+        { id: 71, section: "Inorganic", chapter: "Periodic", topic: "EN", q: "Most Electronegative?", options: ["Cl", "F", "O", "N"], ans: 1, sol: "Fluorine." },
+        { id: 72, section: "Organic", chapter: "Aldehydes", topic: "Etard", q: "Toluene + CrO2Cl2?", options: ["Benzoic Acid", "Benzaldehyde", "Benzyl alc", "Phenol"], ans: 1, sol: "Benzaldehyde prep." },
+        { id: 73, section: "Organic", chapter: "Polymers", topic: "Biodegradable", q: "Biodegradable?", options: ["PHBV", "Nylon 6", "PVC", "Bakelite"], ans: 0, sol: "PHBV." },
+        { id: 74, section: "Physical", chapter: "Thermo", topic: "Entropy", q: "Melting of ice dS?", options: ["Increases", "Decreases", "Constant", "Zero"], ans: 0, sol: "Disorder increases." },
+        { id: 75, section: "Inorganic", chapter: "P-Block", topic: "Shape", q: "Shape of PCl3?", options: ["Pyramidal", "Trigonal Planar", "T-shape", "Tetrahedral"], ans: 0, sol: "sp3 1 lone pair." },
+        { id: 76, section: "Organic", chapter: "Alcohols", topic: "Dehydration", q: "Ethanol + H2SO4 (443K)?", options: ["Ethene", "Ethoxyethane", "Ethyl Sulfate", "Ethane"], ans: 0, sol: "Alkene formed." },
+        { id: 77, section: "Organic", chapter: "Amines", topic: "Hoffmann", q: "R-CONH2 + Br2/KOH?", options: ["R-NH2", "R-Br", "R-OH", "R-CN"], ans: 0, sol: "Degradation to amine." },
+        { id: 78, section: "Physical", chapter: "Surface", topic: "Catalysis", q: "Shape selective catalyst?", options: ["V2O5", "Zeolites", "Fe", "Pt"], ans: 1, sol: "Zeolites (ZSM-5)." },
+        { id: 79, section: "Inorganic", chapter: "D-Block", topic: "Lanthanoids", q: "Cause of Contraction?", options: ["Poor 4f shielding", "High 4f shielding", "Poor 5d shielding", "Nuclear charge"], ans: 0, sol: "Poor shielding." },
+        { id: 80, section: "Organic", chapter: "Biomolecules", topic: "DNA", q: "Base NOT in DNA?", options: ["Adenine", "Guanine", "Cytosine", "Uracil"], ans: 3, sol: "Uracil is in RNA." },
+        { id: 81, section: "Physical", chapter: "Solutions", topic: "Ideal", q: "Ideal solution condition?", options: ["dH_mix=0", "dV_mix!=0", "P!=Pcalc", "A-B != A-A"], ans: 0, sol: "No heat change." },
+        { id: 82, section: "Physical", chapter: "Atomic", topic: "Spectrum", q: "Balmer series region?", options: ["UV", "Visible", "IR", "Far IR"], ans: 1, sol: "Visible." },
+        { id: 83, section: "Inorganic", chapter: "Bonding", topic: "H-Bond", q: "Strongest H-bond?", options: ["H-F...H", "H-O...H", "H-N...H", "H-S...H"], ans: 0, sol: "F is most EN." },
+        { id: 84, section: "Organic", chapter: "Hydrocarbons", topic: "Ozonolysis", q: "2-Butene Ozonolysis?", options: ["Ethanal", "Propanone", "Methanal", "Ethanol"], ans: 0, sol: "Acetaldehyde." },
+        { id: 85, section: "Organic", chapter: "GOC", topic: "Electromeric", q: "Electromeric effect is?", options: ["Permanent", "Temporary", "Inductive", "Resonance"], ans: 1, sol: "Temporary." },
+        { id: 86, section: "Physical", chapter: "Kinetics", topic: "Order", q: "Half life indep of conc?", options: ["0", "1", "2", "3"], ans: 1, sol: "First order." },
+        { id: 87, section: "Physical", chapter: "Electrochem", topic: "Conductivity", q: "Conductivity on dilution?", options: ["Increases", "Decreases", "Same", "None"], ans: 1, sol: "Ions per unit vol decrease." },
+        { id: 88, section: "Inorganic", chapter: "Coordination", topic: "IUPAC", q: "K4[Fe(CN)6] name?", options: ["Potassium ferrocyanide", "Potassium hexacyanoferrate(II)", "Potassium hexacyanoiron", "Tetra..."], ans: 1, sol: "IUPAC convention." },
+        { id: 89, section: "Inorganic", chapter: "P-Block", topic: "Basicity", q: "Basicity of H3PO3?", options: ["1", "2", "3", "0"], ans: 1, sol: "2 P-OH bonds." },
+        { id: 90, section: "Organic", chapter: "Aldehydes", topic: "Clemmensen", q: "Clemmensen Reagent?", options: ["Zn-Hg/HCl", "NH2NH2/KOH", "NaBH4", "LiAlH4"], ans: 0, sol: "Acidic reduction." },
+        { id: 91, section: "Organic", chapter: "Haloalkanes", topic: "Optical", q: "Enantiomers differ in?", options: ["BP", "RI", "Rotation of PPL", "Solubility"], ans: 2, sol: "Optical rotation." },
+        { id: 92, section: "Physical", chapter: "Equilibrium", topic: "pH", q: "pH of 10^-8 M HCl?", options: ["8", "7", "6.98", "6"], ans: 2, sol: "Slightly acidic < 7." },
+        { id: 93, section: "Physical", chapter: "Thermo", topic: "Adiabatic", q: "Adiabatic expansion?", options: ["T increases", "T decreases", "T const", "P const"], ans: 1, sol: "Cooling effect." },
+        { id: 94, section: "Inorganic", chapter: "P-Block", topic: "Shape", q: "Shape of ClF3?", options: ["T-shape", "Planar", "Pyramidal", "Linear"], ans: 0, sol: "Bent T-shape." },
+        { id: 95, section: "Inorganic", chapter: "D-Block", topic: "Color", q: "KMnO4 color due to?", options: ["d-d", "Charge Transfer", "f-f", "Defect"], ans: 1, sol: "LMCT." },
+        { id: 96, section: "Organic", chapter: "Phenols", topic: "Test", q: "Phenol + FeCl3?", options: ["Violet", "Red", "White", "Green"], ans: 0, sol: "Violet complex." },
+        { id: 97, section: "Organic", chapter: "Amines", topic: "Carbylamine", q: "Test for?", options: ["1 deg amine", "2 deg", "3 deg", "Amide"], ans: 0, sol: "Primary amines." },
+        { id: 98, section: "Organic", chapter: "GOC", topic: "Isomerism", q: "Metamerism shown by?", options: ["Alcohols", "Ethers", "Aldehydes", "Acids"], ans: 1, sol: "Ethers." },
+        { id: 99, section: "Physical", chapter: "Solid State", topic: "Defects", q: "Schottky defect decreases?", options: ["Color", "Density", "Cond", "Mass"], ans: 1, sol: "Density." },
+        { id: 100, section: "Inorganic", chapter: "Metallurgy", topic: "Zone Refining", q: "Principle?", options: ["Density", "BP", "Impurity Solubility", "VP"], ans: 2, sol: "Melt solubility." }
+    ];
+
+    // --- APP LOGIC ---
+    let score = 0;
+    let answered = 0;
+    const container = document.getElementById('quiz-app');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+
+    function filterQuestions(filterType) {
+        // Update Tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Render
+        container.innerHTML = '';
+        const questions = filterType === 'All' ? db : db.filter(q => q.section === filterType);
+        
+        questions.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.setAttribute('data-sec', item.section);
+            
+            let optsHTML = '';
+            item.options.forEach((opt, i) => {
+                optsHTML += `<div class="opt" onclick="checkAnswer(this, ${item.ans}, ${i}, 'sol-${item.id}')">${opt}</div>`;
+            });
+
+            card.innerHTML = `
+                <div class="meta">
+                    <span class="tag" style="background:${getSecColor(item.section)}; color:white;">${item.section}</span>
+                    <span class="tag">${item.chapter}</span>
+                    <span class="tag">${item.topic}</span>
+                </div>
+                <div class="q-text">Q${index+1}. ${item.q}</div>
+                <div class="options-grid">
+                    ${optsHTML}
+                </div>
+                <div class="solution" id="sol-${item.id}">
+                    <strong>Answer & Logic:</strong><br>
+                    ${item.sol}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        
+        if(window.MathJax) MathJax.typeset();
+    }
+
+    function checkAnswer(el, correctIndex, selectedIndex, solId) {
+        if(el.parentElement.classList.contains('locked')) return;
+        el.parentElement.classList.add('locked'); // Lock interaction
+
+        const options = el.parentElement.children;
+        
+        if(selectedIndex === correctIndex) {
+            el.classList.add('correct');
+            score++;
+            scoreEl.innerText = score;
+        } else {
+            el.classList.add('wrong');
+            options[correctIndex].classList.add('correct');
+        }
+        
+        // Dim others
+        Array.from(options).forEach(opt => {
+            if(!opt.classList.contains('correct') && !opt.classList.contains('wrong')) {
+                opt.classList.add('dim');
+            }
+        });
+
+        // Show solution
+        document.getElementById(solId).style.display = 'block';
+
+        // Update Progress
+        answered++;
+        let pct = Math.round((answered / db.length) * 100);
+        progressEl.innerText = pct + "%";
+    }
+
+    function getSecColor(sec) {
+        if(sec === 'Physical') return '#dc2626';
+        if(sec === 'Organic') return '#16a34a';
+        if(sec === 'Inorganic') return '#d97706';
+        return '#64748b';
+    }
+
+    // Init
+    filterQuestions('All');
+    document.querySelector('.tab').classList.add('active');
+
+</script>
+</body>
+</html>
